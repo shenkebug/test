@@ -19,5 +19,4 @@ function pop() {
     boxes[length - 1].remove();
     num--;
   }
-
 }
