@@ -14,5 +14,5 @@ jobs:
           USER: ${{ secrets.USER }}
           PASSWORD: ${{ secrets.PASSWORD }}
           SENDER: ${{ secrets.SENDER }}
-          USER: ${{ secrets.RECEIVER }}
+          RECEIVER: ${{ secrets.RECEIVER }}
 
