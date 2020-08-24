@@ -32,8 +32,8 @@ class SearchUDTF1(TableFunction):
         if len(vec) != 0 and not vec.isspace():
             vec = np.array([float(v) for v in vec.split(' ')]).astype(self.element_type.to_numpy_type())
             results = self.ctx.search(query=vec)
-            for result in results[0]:
-                yield str(result.key())
+            for i in results[0]:
+                yield str(i.key())
         return None
 
 

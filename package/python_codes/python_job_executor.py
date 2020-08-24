@@ -1,6 +1,7 @@
 import os
 import shutil
 
+import ai_flow as af
 import numpy as np
 import pandas as pd
 import tensorflow as tf
@@ -55,4 +56,21 @@ class TrainAutoEncoder(Executor):
         model_meta: ModelMeta = function_context.node_spec.output_model
         # Register model version to notify that cluster serving is ready to start loading the registered model version.
         register_model_version(model=model_meta, model_path=model_path)
+        return []
+
+
+class MergePredictResult(Executor):
+    def execute(self, function_context: FunctionContext, input_list: List) -> List:
+        num_of_files = 100
+        path = af.get_example_by_name('predict_result').batch_uri
+        filenames = []
+        for i in range(1, num_of_files + 1):
+            filenames.append(str(path + '/' + str(i)))
+
+        outfile_path = af.get_example_by_name('merge_data').batch_uri
+        with open(outfile_path, 'w') as outfile:
+            for fname in filenames:
+                with open(fname) as infile:
+                    for line in infile:
+                        outfile.write(line)
         return []

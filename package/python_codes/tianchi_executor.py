@@ -12,6 +12,7 @@ from pyflink.datastream import StreamExecutionEnvironment
 from pyflink.table import Table, DataTypes, ScalarFunction
 from pyflink.table import TableEnvironment, StreamTableEnvironment, EnvironmentSettings, BatchTableEnvironment, \
     CsvTableSink
+from pyflink.table.descriptors import FileSystem, OldCsv, Schema
 from pyflink.table.udf import udf, FunctionContext
 from zoo.serving.client import InputQueue
 
@@ -20,13 +21,13 @@ class StreamTableEnvCreatorBuildIndex(TableEnvCreator):
 
     def create_table_env(self):
         stream_env = StreamExecutionEnvironment.get_execution_environment()
-        stream_env.set_parallelism(20) #100
+        stream_env.set_parallelism(100)
         t_env = StreamTableEnvironment.create(
             stream_env,
             environment_settings=EnvironmentSettings.new_instance()
                 .in_streaming_mode().use_blink_planner().build())
         statement_set = t_env.create_statement_set()
-        t_env.get_config().set_python_executable('/opt/module/anaconda/envs/ai/bin/python')
+        t_env.get_config().set_python_executable('/usr/bin/python3')
         t_env.get_config().get_configuration().set_boolean("python.fn-execution.memory.managed", True)
         return stream_env, t_env, statement_set
 
@@ -41,7 +42,7 @@ class StreamTableEnvCreator(TableEnvCreator):
             environment_settings=EnvironmentSettings.new_instance()
                 .in_streaming_mode().use_blink_planner().build())
         statement_set = t_env.create_statement_set()
-        t_env.get_config().set_python_executable('/opt/module/anaconda/envs/ai/bin/python')
+        t_env.get_config().set_python_executable('/usr/bin/python3')
         t_env.get_config().get_configuration().set_boolean("python.fn-execution.memory.managed", True)
         return stream_env, t_env, statement_set
 
@@ -54,7 +55,7 @@ class BatchTableEnvCreator(TableEnvCreator):
             environment_settings=EnvironmentSettings.new_instance().in_batch_mode().use_blink_planner().build())
         t_env._j_tenv.getPlanner().getExecEnv().setParallelism(1)
         statement_set = t_env.create_statement_set()
-        t_env.get_config().set_python_executable('/opt/module/anaconda/envs/ai/bin/python')
+        t_env.get_config().set_python_executable('/usr/bin/python3')
         t_env.get_config().get_configuration().set_boolean("python.fn-execution.memory.managed", True)
         return exec_env, t_env, statement_set
 
@@ -67,6 +68,25 @@ class ReadTrainExample(SourceExecutor):
                                 uuid varchar,
                                 face_id varchar,
                                 device_id varchar,
+                                feature_data varchar
+                    ) with (
+                        'connector.type' = 'filesystem',
+                        'format.type' = 'csv',
+                        'connector.path' = '{}',
+                        'format.ignore-first-line' = 'false',
+                        'format.field-delimiter' = ';'
+                    )""".format(path)
+        table_env.execute_sql(ddl)
+        return table_env.from_path('training_table')
+
+
+class ReadMergeExample(SourceExecutor):
+    def execute(self, function_context: FlinkFunctionContext) -> Table:
+        table_env: TableEnvironment = function_context.get_table_env()
+        path = function_context.get_example_meta().batch_uri
+        ddl = """create table training_table(
+                                uuid varchar,
+                                face_id varchar,
                                 feature_data varchar
                     ) with (
                         'connector.type' = 'filesystem',
@@ -275,3 +295,21 @@ class WriteSecondResult(SinkExecutor):
                 )
                 """)
         statement_set.add_insert('write_example', input_table)
+
+
+class WritePredictResult(SinkExecutor):
+    def execute(self, function_context: FlinkFunctionContext, input_table: Table) -> None:
+        t_env = function_context.get_table_env()
+        statement_set = function_context.get_statement_set()
+        dummy_output_path = function_context.get_example_meta().batch_uri
+        if os.path.exists(dummy_output_path):
+            if os.path.isdir(dummy_output_path):
+                shutil.rmtree(dummy_output_path)
+            else:
+                os.remove(dummy_output_path)
+        sink = CsvTableSink(['a', 'b', 'c'],
+                            [DataTypes.STRING(), DataTypes.STRING(), DataTypes.STRING()],
+                            dummy_output_path,
+                            ';')
+        t_env.register_table_sink('mySink', sink)
+        statement_set.add_insert("mySink", input_table)
