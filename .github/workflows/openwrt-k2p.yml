@@ -91,7 +91,7 @@ jobs:
         with:
           key: ${{ secrets.BARK_KEY }}
           title: Compilation work is over
-          desp: See https://github.com/$GITHUB_REPOSITORY
+          body: See https://github.com/$GITHUB_REPOSITORY
 
       # - name: Space cleanup
       #   env:
