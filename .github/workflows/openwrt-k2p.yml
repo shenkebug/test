@@ -1,20 +1,29 @@
-name: OpenWrt CI
+name: Build OpenWrt Firmware for PHICOMM K2P
 
 on:
   repository_dispatch:
   workflow_dispatch:
   # schedule:
   #   - cron: 0 20 * * *
-  release:
-    types: [published]
+
+env:
+  REPO_URL: https://github.com/coolsnowwolf/lede
+  REPO_BRANCH: master
+  FEEDS_CONF: feeds.conf.default
+  CONFIG_FILE: .config
+  TZ: Asia/Shanghai
 
 jobs:
 
-  build_openwrt:
+  build_openwrt_firmware:
 
-    name: Build OpenWrt firmware
+    name: Build OpenWrt Firmware
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
+
+    # defaults:
+    #   run:
+    #     working-directory: k2p
 
     if: github.event.repository.owner.id == github.event.sender.id
 
@@ -23,11 +32,66 @@ jobs:
       - name: Checkout
         uses: actions/checkout@main
 
-      - name: Test
-        run: |
-          pwd
-          ls -alh
-          git branch
+      # - name: Initialize environment
+      #   env:
+      #     DEBIAN_FRONTEND: noninteractive
+      #   run: |
+      #     pwd
+      #     ls -alh
+      #     echo $GITHUB_WORKSPACE
+      #     sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
+      #     sudo -E apt-get update
+      #     sudo -E apt-get -y install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch python2.7 unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler g++-multilib antlr3 gperf wget swig rsync libtinfo5
+      #     sudo -E apt-get -y autoremove --purge
+      #     sudo -E apt-get clean
+      #     sudo timedatectl set-timezone "$TZ"
+
+      # - name: Download source code
+      #   run: git clone $REPO_URL -b $REPO_BRANCH openwrt
+
+      # - name: Load custom feeds
+      #   run: [ -f $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
+
+      # - name: Update feeds
+      #   run: cd openwrt && ./scripts/feeds update -a
+
+      # - name: Install feeds
+      #   run: cd openwrt && ./scripts/feeds install -a
+
+      # - name: Load custom configuration
+      #   run: [ -f $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
+
+      # - name: Download package
+      #   run: |
+      #     cd openwrt
+      #     make defconfig
+      #     make download -j8
+      #     find dl -size -1024c -exec ls -l {} \;
+      #     find dl -size -1024c -exec rm -f {} \;
+
+      # - name: Compile the firmware
+      #   run: |
+      #     cd openwrt
+      #     echo -e "Compile with $(nproc) thread(s)"
+      #     make -j$(nproc) || make -j1 || make -j1 V=s
+      #     echo "::set-output name=status::success"
+      #     grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
+      #     [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
+      #     echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
+
+      - name: ServerChan Notify
+        uses: yakumioto/serverchan-action@v1
+        with:
+          key: ${{ secrets.SCKEY }}
+          text: Compilation work is over
+          desp: See ($GITHUB_REPOSITORY)[https://github.com/$GITHUB_REPOSITORY]
+
+      - name: Bark Notify
+        uses: shink/bark-action@v1
+        with:
+          key: ${{ secrets.BARK_KEY }}
+          title: Compilation work is over
+          desp: See https://github.com/$GITHUB_REPOSITORY
 
       # - name: Space cleanup
       #   env:
@@ -96,7 +160,7 @@ jobs:
       #   with:
       #     name: OpenWrt_firmware
       #     path: ./bin/targets/
-  
+
       # - name: Upload release asset
       #   if: github.event == 'release'
       #   uses: svenstaro/upload-release-action@v2
