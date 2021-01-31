@@ -1,0 +1,23 @@
+name: Test
+
+on:
+  repository_dispatch:
+  workflow_dispatch:
+
+jobs:
+  job:
+    name: Test job
+    runs-on: ubuntu-18.04
+
+    if: github.event.repository.owner.id == github.event.sender.id
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      
+      - name: Bark notify
+        if: always()
+        uses: shink/bark-action@v1
+        with:
+          key: ${{ secrets.BARK_KEY }}
+          title: Compilation work is over
+          body: `see ${{ env.GITHUB_SERVER_URL }}/${{ env.GITHUB_REPOSITORY }}/actions/runs/${{ env.GITHUB_RUN_ID }}`
