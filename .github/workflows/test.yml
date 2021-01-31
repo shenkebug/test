@@ -17,8 +17,8 @@ jobs:
       - name: Print variable
         run: |
           echo $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID
-          echo "ACTIONS_URL=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >> $GITHUB_ENV
-          echo $ACTIONS_URL
+          echo "WORKFLOW_URL=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >> $GITHUB_ENV
+          echo $WORKFLOW_URL
 
       - name: Bark notify
         if: always()
@@ -26,4 +26,4 @@ jobs:
         with:
           key: ${{ secrets.BARK_KEY }}
           title: Compilation work is over
-          body: ${{ env.ACTIONS_URL }}
+          body: see ${{ env.WORKFLOW_URL }}
