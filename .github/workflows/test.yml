@@ -4,9 +4,6 @@ on:
   repository_dispatch:
   workflow_dispatch:
 
-env:
-  ACTIONS_URL: ${{ env.GITHUB_SERVER_URL }}/${{ env.GITHUB_REPOSITORY }}/actions/runs/${{ env.GITHUB_RUN_ID }}
-
 jobs:
   job:
     name: Test job
@@ -24,8 +21,13 @@ jobs:
 
       - name: Bark notify
         if: always()
+        run: |
+          echo ${{ env.GITHUB_SERVER_URL }}/${{ env.GITHUB_REPOSITORY }}/actions/runs/${{ env.GITHUB_RUN_ID }}
+          echo $ACTIONS_URL
         uses: shink/bark-action@v1
         with:
           key: ${{ secrets.BARK_KEY }}
           title: Compilation work is over
           body: ${{ env.ACTIONS_URL }}
+        env:
+          ACTIONS_URL: ${{ env.GITHUB_SERVER_URL }}/${{ env.GITHUB_REPOSITORY }}/actions/runs/${{ env.GITHUB_RUN_ID }}
