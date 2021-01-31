@@ -20,4 +20,4 @@ jobs:
         with:
           key: ${{ secrets.BARK_KEY }}
           title: Compilation work is over
-          body: `see ${{ env.GITHUB_SERVER_URL }}/${{ env.GITHUB_REPOSITORY }}/actions/runs/${{ env.GITHUB_RUN_ID }}`
+          body: "see ${{ env.GITHUB_SERVER_URL }}/${{ env.GITHUB_REPOSITORY }}/actions/runs/${{ env.GITHUB_RUN_ID }}"
