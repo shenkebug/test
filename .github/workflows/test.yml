@@ -14,6 +14,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       
+      - run: |
+        echo "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+
       - name: Bark notify
         if: always()
         uses: shink/bark-action@v1
@@ -21,3 +24,6 @@ jobs:
           key: ${{ secrets.BARK_KEY }}
           title: Compilation work is over
           body: "see $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+      
+      - run: |
+        echo "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
