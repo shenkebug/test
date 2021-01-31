@@ -19,11 +19,13 @@ jobs:
           echo $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID
           echo "WORKFLOW_URL=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >> $GITHUB_ENV
           echo $WORKFLOW_URL
+          echo ${{ env.WORKFLOW_URL }}
+          github
 
       - name: Bark notify
         if: always()
         uses: shink/bark-action@v1
         with:
           key: ${{ secrets.BARK_KEY }}
-          title: Compilation work is over
-          body: see ${{ env.WORKFLOW_URL }}
+          title: see ${{ env.WORKFLOW_URL }}
+          body: see https://github.com/${{ github.repository }}/${{ github.run_id }}
