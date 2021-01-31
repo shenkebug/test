@@ -8,6 +8,8 @@ jobs:
   job:
     name: Test job
     runs-on: ubuntu-18.04
+    env:
+      ACTIONS_URL: ${{ env.GITHUB_SERVER_URL }}/${{ env.GITHUB_REPOSITORY }}/actions/runs/${{ env.GITHUB_RUN_ID }}
 
     if: github.event.repository.owner.id == github.event.sender.id
     steps:
@@ -26,5 +28,3 @@ jobs:
           key: ${{ secrets.BARK_KEY }}
           title: Compilation work is over
           body: ${{ env.ACTIONS_URL }}
-        env:
-          ACTIONS_URL: ${{ env.GITHUB_SERVER_URL }}/${{ env.GITHUB_REPOSITORY }}/actions/runs/${{ env.GITHUB_RUN_ID }}
