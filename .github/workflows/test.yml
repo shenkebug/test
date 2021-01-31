@@ -4,6 +4,9 @@ on:
   repository_dispatch:
   workflow_dispatch:
 
+env:
+  ACTIONS_URL: ${{ env.GITHUB_SERVER_URL }}/${{ env.GITHUB_REPOSITORY }}/actions/runs/${{ env.GITHUB_RUN_ID }}
+
 jobs:
   job:
     name: Test job
@@ -16,7 +19,8 @@ jobs:
       
       - name: Print variable
         run: |
-          echo "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          echo $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID
+          echo $ACTIONS_URL
 
       - name: Bark notify
         if: always()
@@ -24,8 +28,4 @@ jobs:
         with:
           key: ${{ secrets.BARK_KEY }}
           title: Compilation work is over
-          body: "see $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-      
-      - name: Print variable
-        run: |
-          echo "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          body: ${{ env.ACTIONS_URL }}
