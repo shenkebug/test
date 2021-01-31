@@ -13,19 +13,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      
-      - name: Print variable
-        run: |
-          echo $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID
-          echo "WORKFLOW_URL=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >> $GITHUB_ENV
-          echo $WORKFLOW_URL
-          echo ${{ env.WORKFLOW_URL }}
-          github
 
       - name: Bark notify
         if: always()
         uses: shink/bark-action@v1
         with:
           key: ${{ secrets.BARK_KEY }}
-          title: see ${{ env.WORKFLOW_URL }}
-          body: see https://github.com/${{ github.repository }}/${{ github.run_id }}
+          body: Compilation work is over
+          url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
