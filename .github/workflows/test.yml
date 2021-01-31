@@ -21,9 +21,6 @@ jobs:
 
       - name: Bark notify
         if: always()
-        run: |
-          echo ${{ env.GITHUB_SERVER_URL }}/${{ env.GITHUB_REPOSITORY }}/actions/runs/${{ env.GITHUB_RUN_ID }}
-          echo $ACTIONS_URL
         uses: shink/bark-action@v1
         with:
           key: ${{ secrets.BARK_KEY }}
