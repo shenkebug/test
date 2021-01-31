@@ -8,8 +8,6 @@ jobs:
   job:
     name: Test job
     runs-on: ubuntu-18.04
-    env:
-      ACTIONS_URL: ${{ env.GITHUB_SERVER_URL }}/${{ env.GITHUB_REPOSITORY }}/actions/runs/${{ env.GITHUB_RUN_ID }}
 
     if: github.event.repository.owner.id == github.event.sender.id
     steps:
@@ -19,6 +17,7 @@ jobs:
       - name: Print variable
         run: |
           echo $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID
+          echo "ACTIONS_URL=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >> $GITHUB_ENV
           echo $ACTIONS_URL
 
       - name: Bark notify
