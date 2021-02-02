@@ -1,13 +1,12 @@
-name: Test
+name: Check for updates
 
 on:
   workflow_dispatch:
-  repository_dispatch:
-    types: [ updated ]
+  push:
 
 jobs:
   job:
-    name: Test job
+    name: Check for updates
     runs-on: ubuntu-18.04
 
     if: github.event.repository.owner.id == github.event.sender.id
@@ -20,4 +19,10 @@ jobs:
         uses: shink/bark-action@v1
         with:
           key: ${{ secrets.BARK_KEY }}
-          body: job is over
+          body: check job is over
+
+      - name: Trigger build
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.ACCESS_TOKEN }}
+          event-type: updated
